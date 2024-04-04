@@ -1,11 +1,9 @@
-#
-#    temp file!!
-#
 import os
 import psycopg2
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
+from flask.helpers import send_from_directory
 
 CREATE_USERS_TABLE = (
     "CREATE TABLE IF NOT EXISTS users (id SERIAL PRIMARY KEY, fornavn TEXT, efternavn TEXT, alder INTEGER, email TEXT, adgangskode TEXT);"
@@ -37,12 +35,13 @@ FIND_BILER = (
 
 load_dotenv()
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder="frontend/build", static_url_path='')
 CORS(app)
 url = os.getenv("DATABASE_URL")
 connection = psycopg2.connect(url)
 
 @app.post("/api/user")
+@cross_origin()
 def create_user():
     data = request.get_json()
     fornavn = data["fornavn"]
@@ -58,6 +57,7 @@ def create_user():
     return {"id": user_id, "message": f"User ({fornavn} {efternavn}) has been created!"}, 201
 
 @app.post("/api/bil")
+@cross_origin()
 def create_bil():
     data = request.get_json()
     ejer = data["ejer_id"]
@@ -70,6 +70,7 @@ def create_bil():
     return {"message": f"Car has been created!"}, 201
 
 @app.get("/api/get/users")
+@cross_origin()
 def get_users():
     with connection:
         with connection.cursor() as cursor:
@@ -93,6 +94,7 @@ def get_users():
     return jsonify({"users": final})
 
 @app.get("/api/get/biler")
+@cross_origin
 def get_biler():
     with connection:
         with connection.cursor() as cursor:
@@ -107,3 +109,8 @@ def find_user(id):
             cursor.execute(FIND_USER, (id,))
             user = cursor.fetchone()[0]
     return {"message": f"{user}"}, 201
+
+@app.route('/')
+@cross_origin()
+def serve():
+    return send_from_directory(app.static_folder, 'index.html')
