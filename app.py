@@ -5,6 +5,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS, cross_origin
 from flask.helpers import send_from_directory
 
+#region SQL COMMANDS
 CREATE_USERS_TABLE = (
     "CREATE TABLE IF NOT EXISTS users (id SERIAL PRIMARY KEY, fornavn TEXT, efternavn TEXT, alder INTEGER, email TEXT, adgangskode TEXT);"
 )
@@ -32,6 +33,7 @@ FIND_USER = (
 FIND_BILER = (
     "SELECT * FROM biler WHERE ejer_id=%s;"
 )
+#endregion
 
 load_dotenv()
 
